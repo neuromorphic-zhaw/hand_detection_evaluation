@@ -1,58 +1,66 @@
-# run infercence our traine DHP19 model on Loihi?
-from lava.lib.dl import netx
-import logging
-import torch
+from matplotlib import pyplot as plt
 import numpy as np
-from dataset import DHP19NetDataset
-from lava.proc import io
-from plot import plot_input_sample
-import numpy as np
-import matplotlib.pyplot as plt
-from lava.magma.core.run_conditions import RunSteps
-from lava.magma.core.run_configs import Loihi2HwCfg, Loihi2SimCfg
-from lava.utils.system import Loihi2
-from dataset import DHP19NetDataset
 
-
-
-def show_model_output(model_output, downsample_factor=2, img_height=260, img_width=344, time_step=None):
-    xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
-        # get parts of the output data by coordinate and joint
-    joint = 0    
-    coords_1hot = model_output[joint*xy_coord_vec_length:(joint+1)*xy_coord_vec_length]
-    coords_one_hot_y1 = coords_1hot[0:int(img_height / downsample_factor)]
-    coords_one_hot_x1 = coords_1hot[int(img_height / downsample_factor):]
-
-    joint = 1    
-    coords_1hot = model_output[joint*xy_coord_vec_length:(joint+1)*xy_coord_vec_length]
-    coords_one_hot_y2 = coords_1hot[0:int(img_height / downsample_factor)]
-    coords_one_hot_x2 = coords_1hot[int(img_height / downsample_factor):]
+def plot_input_sample(input_frame, target_coords=None, title=None, path=None):
+    """
+    Plot a single sample from the dataset.
+    Parameters
+    ----------
+    input_frame : torch.Tensor
+        Input frame. (H x W) e.g (260 x 344)
+    target_coords : torch.Tensor, optional
+        Target coordinates. The default is None.
+    title : str, optional
+        Title of the plot. The default is None.
+    path : str, optional
+        Path to save the plot. The default is None.
+    Returns
+    -------
+    None.
     
-    fig = plt.figure(figsize=(10, 10)) # create figure
-
-    # self.input_frame = self.fig.add_subplot(111)
-    y1 = plt.subplot2grid((2, 2), (0, 0))
-    x1 = plt.subplot2grid((2, 2), (0, 1))
-    y2 = plt.subplot2grid((2, 2), (1, 0))
-    x2 = plt.subplot2grid((2, 2), (1, 1))
-    y1.plot(coords_one_hot_y1)
-    y1.set_ylabel('y')
-    y1.set_title('Joint 1')
-    x1.plot(coords_one_hot_x1)
-    x1.set_ylabel('x')
-    y2.plot(coords_one_hot_y2)
-    y2.set_ylabel('y') 
-    y2.set_title('Joint 2')
-    x2.plot(coords_one_hot_x2)
-    x2.set_ylabel('y')
-    fig.tight_layout()
-    if time_step is not None:
-        fig.suptitle('Model output at time step ' + str(time_step))
+    """
+    plt.imshow(input_frame, cmap='gray')
+    if target_coords is not None:
+        plt.plot(target_coords[1], target_coords[0], 'go', label='target')
+        plt.legend()
+    if title:
+        plt.title(title)
+    if path:
+        plt.savefig(path)
+        plt.close()
     else:
-        fig.suptitle('Model output')
-    
-    plt.show()
+        plt.show()
 
+
+def plot_target_coords_1hot(target, joint_idxs, img_height, img_width, downsample_factor, path=None):
+    num_joints = len(joint_idxs)
+    xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
+
+    # show target
+    plt.figure(figsize=(20, 10))
+    for joint in range(num_joints):
+        coords_1hot = target[joint*xy_coord_vec_length:(joint+1)*xy_coord_vec_length]
+        coords_one_hot_y = coords_1hot[0:int(img_height / downsample_factor)]
+        coords_one_hot_x = coords_1hot[int(img_height / downsample_factor):]
+        act_target_y = np.where(coords_one_hot_y == coords_one_hot_y.max())[0][0]
+        act_target_x = np.where(coords_one_hot_x == coords_one_hot_x.max())[0][0]
+
+        plt.subplot(num_joints, 2, (2*joint)+1)
+        plt.plot(coords_one_hot_y)
+        plt.vlines(act_target_y, ymin=0, ymax=1, colors='g', linestyles='dashed', label='target')
+        plt.ylabel('y target')
+        plt.title('Joint ' + str(joint_idxs[joint]))
+        
+        plt.subplot(num_joints, 2, (2*joint)+2)
+        plt.plot(coords_one_hot_x)
+        plt.vlines(act_target_x, ymin=0, ymax=1, colors='g', linestyles='dashed', label='target')
+        plt.ylabel('x target')
+    
+    if path:
+        plt.savefig(path)
+        plt.close()
+    else:
+        plt.show()
 
 
 def plot_output_vs_target(model_output, target, downsample_factor=2, img_height=260, img_width=344, time_step=None, filename=None):
@@ -139,7 +147,6 @@ def plot_output_vs_target(model_output, target, downsample_factor=2, img_height=
         plt.show()
 
 
-
 def plot_input_vs_prediction_vs_target(input, model_output, target, downsample_factor=2, img_height=260, img_width=344, time_step=None, filename=None):
     xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
     
@@ -212,125 +219,40 @@ def plot_input_vs_prediction_vs_target(input, model_output, target, downsample_f
         plt.show()
 
 
-if __name__ == '__main__':      
-    # Check if Loihi2 compiker is available and import related modules.
-    # Loihi2.preferred_partition = 'oheogulch'
-    # loihi2_is_available = Loihi2.is_loihi2_available
-
-    loihi2_is_available = False # Force CPU execution
-    print("Loihi2 compiler is not available in this system. "
-        "This tutorial will execute on CPU backend.")
-    compression = io.encoder.Compression.DENSE
-    system = 'cpu'
-    
-
-    # Set paths to model and data
-    project_path = './'
-    # project_path = '/home/hand_detection_SDNN_inference/dataloader_monitor_encoder_test/'
-    model_path = project_path + './model/train/'
-    event_data_path = project_path + './data/dhp19_samples/'
-    # paramters of the traininf data
-    img_width = 344
-    img_height = 260
-    downsample_factor = 2
+def show_model_output(model_output, downsample_factor=2, img_height=260, img_width=344, time_step=None):
     xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
+        # get parts of the output data by coordinate and joint
+    joint = 0    
+    coords_1hot = model_output[joint*xy_coord_vec_length:(joint+1)*xy_coord_vec_length]
+    coords_one_hot_y1 = coords_1hot[0:int(img_height / downsample_factor)]
+    coords_one_hot_x1 = coords_1hot[int(img_height / downsample_factor):]
 
-    # Create Dataset instance
-    batch_size = 8  # batch size
-    learning_rate = 0.00005 # leaerning rate
-    lam = 0.001 # lagrangian for event rate loss
-    num_epochs = 30  # training epochs
-    # steps  = [60, 120, 160] # learning rate reduction milestones
-    cam_idxs = [1,2] # camera index to train on 1,2 are frontal views
-    seq_length = 8 # number of event frames per sequence to be shown to the SDNN
-    joint_idxs = [7, 8] # joint indices to train on
-    num_joints = len(joint_idxs)
-
-    # Load model
-    model_name = 'sdnn_1hot_smoothed_scaled_lowres_rmsprop_relu_v2'
-    # create experiment name
-    experiment_name = model_name + \
-                    '_epochs' + str(num_epochs) + \
-                    '_lr' + str(learning_rate) + \
-                    '_batchsize' + str(batch_size) + \
-                    '_seq' + str(seq_length) + \
-                    '_cam' + str(cam_idxs).replace(' ', '') + \
-                    '_lam' + str(lam)
-
-    act_model_path = model_path + experiment_name + '/'
-    net = netx.hdf5.Network(net_config=act_model_path + 'model.net', skip_layers=1)
+    joint = 1    
+    coords_1hot = model_output[joint*xy_coord_vec_length:(joint+1)*xy_coord_vec_length]
+    coords_one_hot_y2 = coords_1hot[0:int(img_height / downsample_factor)]
+    coords_one_hot_x2 = coords_1hot[int(img_height / downsample_factor):]
     
-    # print(net)
-    len(net)
-    net.inp.shape
-    net.out.shape
-    net.input_message_bits
-    net.output_message_bits
-    net.spike_exp
-    net.in_layer.output_message_bits
-    net.out_layer.neuron
+    fig = plt.figure(figsize=(10, 10)) # create figure
 
-    # # print('Loading net ' + experiment_name    )
-    complete_dataset = DHP19NetDataset(path=event_data_path, joint_idxs=joint_idxs, cam_id=cam_idxs[0], num_time_steps=seq_length)
-    print('Dataset loaded: ' + str(len(complete_dataset)) + ' samples found')
-
-    # show sample from the dataset
-    # input, target = complete_dataset[0]
-    # input.shape # (344, 260) W x H x 1
-    # # input.max()
-    # # input.min()
-    # # target.shape # ((img_widht + img_height)/downsample_factor) * joints (604, )
-    # # plot input sample
-    # plot_input_sample(np.swapaxes(input[:,:,0],0,1), target_coords=None, title='Input frame', path=None)
-
-    # y_ind = np.where(input[:,:,0] > 0)[0]
-    # x_ind = np.where(input[:,:,0] > 0)[1]
-    # input[y_ind,x_ind,0]
+    # self.input_frame = self.fig.add_subplot(111)
+    y1 = plt.subplot2grid((2, 2), (0, 0))
+    x1 = plt.subplot2grid((2, 2), (0, 1))
+    y2 = plt.subplot2grid((2, 2), (1, 0))
+    x2 = plt.subplot2grid((2, 2), (1, 1))
+    y1.plot(coords_one_hot_y1)
+    y1.set_ylabel('y')
+    y1.set_title('Joint 1')
+    x1.plot(coords_one_hot_x1)
+    x1.set_ylabel('x')
+    y2.plot(coords_one_hot_y2)
+    y2.set_ylabel('y') 
+    y2.set_title('Joint 2')
+    x2.plot(coords_one_hot_x2)
+    x2.set_ylabel('y')
+    fig.tight_layout()
+    if time_step is not None:
+        fig.suptitle('Model output at time step ' + str(time_step))
+    else:
+        fig.suptitle('Model output')
     
-    quantize = netx.modules.Quantize(exp=6)  # convert to fixed point representation with 6 bit of fraction
-    sender = io.injector.Injector(shape=net.inp.shape, buffer_size=128)
-    encoder = io.encoder.DeltaEncoder(shape=net.inp.shape,
-                                  vth=net.net_config['layer'][0]['neuron']['vThMant'],
-                                  spike_exp=6,
-                                  num_bits=8,
-                                  compression=compression)
-    
-    sender.out_port.shape
-    receiver = io.extractor.Extractor(shape=net.out.shape, buffer_size=128)
-    dequantize = netx.modules.Dequantize(exp=net.spike_exp + 12, num_raw_bits=24)
-
-    # connect modules
-    sender.out_port.connect(encoder.a_in)
-    encoder.s_out.connect(net.inp)
-    net.out.connect(receiver.in_port)
-
-    # setup run conditions
-    num_steps = 40
-    run_condition = RunSteps(num_steps=num_steps, blocking=False)
-    
-    exception_proc_model_map = {io.encoder.DeltaEncoder: io.encoder.PyDeltaEncoderModelDense}
-    run_config = Loihi2SimCfg(select_tag='fixed_pt',
-                            exception_proc_model_map=exception_proc_model_map)
-
-    sender._log_config.level = logging.WARN
-    sender.run(condition=run_condition, run_cfg=run_config)
-    
-    # t = 1
-    for t in range(num_steps):
-        input, target = complete_dataset[t]
-        # input_quantized = quantize(input)
-
-        sender.send(quantize(input))        # This sends the input frame to the Lava network
-        model_out = receiver.receive()  # This receives the output from the Lava network
-        out_dequantized = dequantize(model_out)
-        
-        # show_model_output(out_dequantized, downsample_factor=2, img_height=260, img_width=344, time_step=t)   
-        plot_output_vs_target(out_dequantized, target, downsample_factor=2, img_height=260, img_width=344, time_step=t, filename='plots/output_vs_target' + str(t) + '_' + system + '.png')
-        # plot_input_vs_prediction_vs_target(input, out_dequantized, target, downsample_factor=2, img_height=260, img_width=344, time_step=t, filename='plots/input_vs_prediction_vs_target_' + str(t) + '_' + system + '.png')
-        
-        print('t = ' + str(t))
-
-
-    sender.wait()
-    sender.stop()
-    print('Done')
+    plt.show()

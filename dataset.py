@@ -95,7 +95,7 @@ class DHP19NetDataset(Dataset):
     -----
 
     >>> dataset = DHP19NetDataset(path='./../data/dhp19/', joint_idx=[7,8], cam_id=1, num_time_steps=8)
-    >>> image, target_coords = dataeset[0]
+    >>> image, target_coords, session, subject, mov = dataeset[0]
     >>> num_samples = len(dataset)
     """
     def __init__(self, path, joint_idxs=[7,8], cam_id=1, num_time_steps=8):
@@ -107,9 +107,9 @@ class DHP19NetDataset(Dataset):
         self.files = [f for f in self.files if f.endswith('pt')]
         self.input_frames = []
         self.target_vectors = []
-        # self.session = []
-        # self.subject = []
-        # self.mov = []
+        self.session = []
+        self.subject = []
+        self.mov = []
 
         # loop over all files in the folder
         # file = files[0]
@@ -135,12 +135,12 @@ class DHP19NetDataset(Dataset):
                 # target_coords_abs_by_cam.shape # joints, cam
                 act_targets_1hot = target_coords_to_onehot_smoothed_lowres(target_coords_abs_by_cam)
                 self.target_vectors.append(act_targets_1hot.numpy().astype(np.float32)) # [0] 
-                # self.session.append(session)
-                # self.subject.append(subject)
-                # self.mov.append(mov)
+                self.session.append(session)
+                self.subject.append(subject)
+                self.mov.append(mov)
 
     def __len__(self):
         return len(self.input_frames)
 
     def __getitem__(self, idx):
-        return self.input_frames[idx], self.target_vectors[idx]
+        return self.input_frames[idx], self.target_vectors[idx], self.session[idx], self.subject[idx], self.mov[idx]
