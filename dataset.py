@@ -75,6 +75,28 @@ def target_coords_to_onehot_smoothed_lowres(target_coords_by_cam, img_height=260
     return target_coords_by_cam_onehot_flatt
 
 
+class dhp19(Dataset):
+    """
+    Dataset class for the dhp19 dataset
+    """
+    def __init__(self, path):
+        self.path = path
+        self.files = os.listdir(path)
+        self.files = [f for f in self.files if f.endswith('pt')]
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        file = self.files[idx]
+        session = int(file.split('_')[1][7:])
+        subject = int(file.split('_')[0][1:])
+        mov = int(file.split('_')[2][3:])
+        data_dict = torch.load(self.path + file)
+
+        return data_dict['input_tensor'].to_dense(), data_dict['target_coords_abs'], data_dict['target_coords_rel'], session, subject, mov
+
+
 class DHP19NetDataset(Dataset):
     """
     Dataset class for the DHP19 dataset
