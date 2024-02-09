@@ -1,6 +1,7 @@
 # repo specific ignores
-data/
-*/plots/
+data/dhp19_samples/*.pt
+*plots/
+*.mp4
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

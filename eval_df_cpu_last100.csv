@@ -1,0 +1,34 @@
+,session,mov,mov_string,fame count,sum dist joint 1,sum dist joint 2,mean dist joint 1,mean dist joint 2
+0,1,1,Left arm abduction,0,0.0,0.0,,
+1,1,2,Right arm abduction,0,0.0,0.0,,
+2,1,3,Left leg abduction,0,0.0,0.0,,
+3,1,4,Right leg abduction,0,0.0,0.0,,
+4,1,5,Left arm bicep curl,0,0.0,0.0,,
+5,1,6,Right arm bicep curl,0,0.0,0.0,,
+6,1,7,Left leg knee lift,0,0.0,0.0,,
+7,1,8,Right leg knee lift,8,183.6722787397321,222.12123155416646,22.95903484246651,27.765153944270807
+8,2,1,Walking 3.5 km/h,32,1148.174180572273,1408.3895133474475,35.88044314288353,44.012172292107735
+9,2,2,Single jump up-down,0,0.0,0.0,,
+10,2,3,Single jump forwards,16,807.2457536878283,964.9936727840714,50.452859605489266,60.31210454900446
+11,2,4,Multiple jumps up-down,0,0.0,0.0,,
+12,2,5,Hop right foot,0,0.0,0.0,,
+13,2,6,Hop left foot,16,354.6866865835604,440.3466110470401,22.167917911472525,27.521663190440005
+14,3,1,Punch straight forward left,0,0.0,0.0,,
+15,3,2,Punch straight forward right,0,0.0,0.0,,
+16,3,3,Punch up forwards left,0,0.0,0.0,,
+17,3,4,Punch up forwards right,0,0.0,0.0,,
+18,3,5,Punch down forwards left,0,0.0,0.0,,
+19,3,6,Punch down forwards right,0,0.0,0.0,,
+20,4,1,Slow jogging 7 km/h,0,0.0,0.0,,
+21,4,2,Star jumps,0,0.0,0.0,,
+22,4,3,Kick forwards left,0,0.0,0.0,,
+23,4,4,Kick forwards right,0,0.0,0.0,,
+24,4,5,Side kick forwards left,0,0.0,0.0,,
+25,4,6,Side kick forwards right,8,326.65706326364835,327.4548199223519,40.832132907956044,40.931852490293984
+26,5,1,Wave hello left hand,8,121.39080835689305,400.8607764553447,15.17385104461163,50.10759705691809
+27,5,2,Wave hello right hand,0,0.0,0.0,,
+28,5,3,Circle left hand,8,193.3179973116553,502.66895330711304,24.16474966395691,62.83361916338913
+29,5,4,Circle right hand,0,0.0,0.0,,
+30,5,5,Figure-8 left hand,0,0.0,0.0,,
+31,5,6,Figure-8 right hand,0,0.0,0.0,,
+32,5,7,Clap,4,507.8792541291558,434.92216249689596,126.96981353228895,108.73054062422399
