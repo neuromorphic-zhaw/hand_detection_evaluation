@@ -1,5 +1,5 @@
 # DHP19 hand detection model evaluation
-Evaluate DHP19 hand detection model running for a subject of the DHP19 dataset
+Evaluate DHP19 hand detection model running for a subject of the DHP19 dataset.
 
 ### Requirements
 ```bash
