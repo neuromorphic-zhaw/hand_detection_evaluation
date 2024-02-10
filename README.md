@@ -39,10 +39,11 @@ Output sample:
 The x/y coordinates for each hand are predicted by the max() of the corresponding part of the output vector. In the example above, the red line indicates the max of the output (i.e. the predicted coordinate) and the green line is the respective target.
 
 # The Issue
-When running the model longer, the model outputs shift to unreasonable values. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 25.
+When running the model longer, the model outputs shift to unreasonable values. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 25.  
 ![Output for frame 25](./doc/img/output_frame25.png)  
-When showing more frames, the output values shift towards negativ values (even the model uses a ReLU at the output) and hence, the prediction becomes rather random. See for instance the output for frame 933.
-![Output for frame 933](./doc/img/output_frame933.png)This shift in the model output continous further to even more random values at the model output, i.e., for frame 3628.
+When showing more frames, the output values shift towards negativ values (even the model uses a ReLU at the output) and hence, the prediction becomes rather random. See for instance the output for frame 933.  
+![Output for frame 933](./doc/img/output_frame933.png)  
+This shift in the model output continous further to even more random values at the model output, i.e., for frame 3628.  
 ![Output for frame 3628](./doc/img/output_frame3628.png)
 
-This deterioration process can best be seen by the corresponding annimation of the output frames. Have a look on the .mp4 file here <https://drive.switch.ch/index.php/s/9AM877VHCdOtjqO>
+This deterioration process can best be seen in the corresponding annimation of the output frames. Have a look on the .mp4 file here <https://drive.switch.ch/index.php/s/9AM877VHCdOtjqO>
