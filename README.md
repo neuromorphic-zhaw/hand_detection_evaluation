@@ -1,5 +1,5 @@
-# hand_detection_evaluation
-Evaluate DHP19 hand detection model running on chip on a subject on the DHP19 dataset
+# DHP19 hand detection model evaluation
+Evaluate DHP19 hand detection model running for a subject of the DHP19 dataset
 
 ### Requirements
 ```bash
@@ -12,27 +12,37 @@ pip list | grep nx
 - lava-nc                   0.8.0
 - lava-optimization         0.3.0
 - nxcore                    2.4.0
-- on `ncl-edu.research.intel-research.net`
 
 ### DHP19 Data Subject 1
-Download the data from <https://drive.switch.ch/index.php/s/8EvGwQmV7RgTR5o> and extract it in the `data/` folder.
-
-```
-cd data
-wget https://drive.switch.ch/index.php/s/8EvGwQmV7RgTR5o/download
-unzip download
-rm -rf download data/ __MACOSX/
-ls data/dhp19_samples/
-```
+Download the .pkl files from <https://drive.switch.ch/index.php/s/Afbx4d00HM0ZRWy> and put into a folder `data/dhp19_samples`.
+The .pkl files contain 4080 event-frames which are the models input stored as scipy.sparse.csr_matrix.
 
 The content of `data/dhp19_samples/` should look like this.
 ```
-S1_session1_mov1_sample0.pt  S1_session1_mov2_sample2.pt  S1_session1_mov3_sample4.pt  S1_session1_mov5_sample1.pt  S1_session1_mov7_sample0.pt  S1_session1_mov8_sample0.pt
-S1_session1_mov1_sample1.pt  S1_session1_mov2_sample3.pt  S1_session1_mov3_sample5.pt  S1_session1_mov5_sample2.pt  S1_session1_mov7_sample1.pt  
-...
-S1_session1_mov8_sample4.pt  S1_session2_mov1_sample52.pt  S1_session2_mov2_sample8.pt   S1_session2_mov3_sample54.pt  S1_session2_mov5_sample18.pt  S1_session2_mov6_sample7.pt   S1_session4_mov1_sample20.pt  S1_session4_mov1_sample67.pt  S1_session4_mov5_sample4.pt   S1_session5_mov7_sample8.pt
-S1_session1_mov8_sample5.pt  S1_session2_mov1_sample53.pt  S1_session2_mov2_sample9.pt   S1_session2_mov3_sample55.pt  S1_session2_mov5_sample19.pt  S1_session2_mov6_sample8.pt   S1_session4_mov1_sample21.pt  S1_session4_mov1_sample68.pt  S1_session4_mov5_sample5.pt   S1_session5_mov7_sample9.pt
+dhp19_data_subject1_cam1.pkl
+dhp19_data_subject1_cam2.pkl
 ```
 
+The dataloader ` DHP19pklDataset()` returns those input frames (dense representation) `[344, 260, 1]` plus target vectors `[604]` and subject ID, movment ID and Session ID from the dataset.
+
+Input sample:
+![input sample from the dataset](/hand_detection_evaluation/doc/img/input_sample.png)
+
 ### DHP19 Model
-`model/train/$model_dir_XYZ/train/` holds the current DHP19 hand detection SDNN model. See <https://github.com/neuromorphic-zhaw/sdnn-hand-detection-model> for the current model.
+`model/train/$model_dir_XYZ/` holds the current DHP19 hand detection SDNN model(s)
+
+### Running model inference in simulation
+`eval_cpu` runs the model on the 4080 input frames for cam 1 or 2 and creates an annimation of the model outputs as .mp4 video, such that on can easily see how the model responded to which input frame. Further, the eucledean distance between prediction and target for both hands are recorded per frame/input and stord as .csv file.
+
+Output sample:  
+![Output sample from the dataset](/hand_detection_evaluation/doc/img/output_sample.png)  
+The x/y coordinates for each hand are predicted by the max() of the corresponding part of the output vector. In the example above, the red line indicates the max of the output (i.e. the predicted coordinate) and the green line is the respective target.
+
+# The Issue
+When running the model longer, the model outputs shift to unreasonable values. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 25.
+![Output for frame 25](/hand_detection_evaluation/doc/img/output_frame25.png)  
+When showing more frames, the output values shift towards negativ values (even the model uses a ReLU at the output) and hence, the prediction becomes rather random. See for instance the output for frame 933.
+![Output for frame 933](/hand_detection_evaluation/doc/img/output_frame933.png)This shift in the model output continous further to even more random values at the model output, i.e., for frame 3628.
+![Output for frame 3628](/hand_detection_evaluation/doc/img/output_frame3628.png)
+
+This deterioration process can best be seen by the corresponding annimation of the output frames. Have a look on the .mp4 file here <https://drive.switch.ch/index.php/s/9AM877VHCdOtjqO>

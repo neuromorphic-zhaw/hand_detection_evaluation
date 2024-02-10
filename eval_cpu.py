@@ -74,12 +74,13 @@ if __name__ == '__main__':
     print("Loihi2 compiler is not available in this system. "
         "This tutorial will execute on CPU backend.")
     compression = io.encoder.Compression.DENSE
-    system = 'cpu_last100'
     
     # Set paths to model and data
     project_path = './'
     model_path = project_path + './model/train/'
-    cam_id = 1
+    cam_id = 2
+    
+    system = 'cpu_cam' + str(cam_id)
     event_data_path = project_path + 'data/dhp19_samples/' + 'dhp19_data_subject1_cam' + str(cam_id) + '.pkl'
     # paramters of the traininf data
     img_width = 344
@@ -125,17 +126,18 @@ if __name__ == '__main__':
     # show sample from the dataset
     # input, target, session, subject, mov = complete_dataset[4000]   
     # input.shape
-    # plt.imshow(input, cmap='gray')
+    # plt.imshow(np.swapaxes(input, 0, 1), cmap='gray')
     # plt.colorbar()
-    # # # print('Session: ' + str(session) + ', Subject: ' + str(subject) + ', Movement: ' + str(mov) + ', ' + movement_names_df.loc[(movement_names_df['session'] == session) & (movement_names_df['mov'] == mov), 'mov_string'].iloc[0])   
-
+    # plt.savefig('doc/img/input_sample.png')
+    # # # # print('Session: ' + str(session) + ', Subject: ' + str(subject) + ', Movement: ' + str(mov) + ', ' + movement_names_df.loc[(movement_names_df['session'] == session) & (movement_names_df['mov'] == mov), 'mov_string'].iloc[0])   
 
     # setup run conditions
     num_steps = 100 #len(complete_dataset)
+    buffer_size = num_steps+1
 
     # setup lava process modules
     quantize = netx.modules.Quantize(exp=6)  # convert to fixed point representation with 6 bit of fraction
-    sender = io.injector.Injector(shape=net.inp.shape, buffer_size=num_steps-8)
+    sender = io.injector.Injector(shape=net.inp.shape, buffer_size=buffer_size)
     encoder = io.encoder.DeltaEncoder(shape=net.inp.shape,
                                   vth=net.net_config['layer'][0]['neuron']['vThMant'],
                                   spike_exp=6,
@@ -143,7 +145,7 @@ if __name__ == '__main__':
                                   compression=compression)
     
     sender.out_port.shape
-    receiver = io.extractor.Extractor(shape=net.out.shape, buffer_size=num_steps-8)
+    receiver = io.extractor.Extractor(shape=net.out.shape, buffer_size=buffer_size)
     dequantize = netx.modules.Dequantize(exp=net.spike_exp + 12, num_raw_bits=24)
 
     # connect modules
@@ -152,10 +154,9 @@ if __name__ == '__main__':
     net.out.connect(receiver.in_port)
 
     # setup display of the encoded input
-    encoder_output_extractor = io.extractor.Extractor(shape=net.inp.shape, buffer_size=num_steps-8)
+    encoder_output_extractor = io.extractor.Extractor(shape=net.inp.shape, buffer_size=buffer_size)
     encoder.s_out.connect(encoder_output_extractor.in_port)
 
-    # num_steps = 40
     run_condition = RunSteps(num_steps=num_steps, blocking=False)
         
     exception_proc_model_map = {io.encoder.DeltaEncoder: io.encoder.PyDeltaEncoderModelDense}
@@ -179,8 +180,8 @@ if __name__ == '__main__':
     target_list = []   
 
     len(complete_dataset)-num_steps
-    for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
-    # for t in range(num_steps):
+    # for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
+    for t in range(num_steps):
         print('t = ' + str(t))
 
         input, target, session, subject, mov  = complete_dataset[t]
@@ -214,9 +215,9 @@ if __name__ == '__main__':
     print(eval_df)
     eval_df.to_csv('eval_df_' + system + '.csv')
 
-     # Create animation of model outputs
-    target_y1, target_x1, target_y2, target_x2, target_one_hot_y1, target_one_hot_x1, target_one_hot_y2, target_one_hot_x2 = get_prediction_from_1hot_vector(target_list[78], downsample_factor=2, img_height=260, img_width=344)
-    prediction_y1, prediction_x1, prediction_y2, prediction_x2, output_one_hot_y1, output_one_hot_x1, output_one_hot_y2, output_one_hot_x2 = get_prediction_from_1hot_vector(output_dequand_list[78], downsample_factor=2, img_height=260, img_width=344)
+    # Create animation of model outputs
+    target_y1, target_x1, target_y2, target_x2, target_one_hot_y1, target_one_hot_x1, target_one_hot_y2, target_one_hot_x2 = get_prediction_from_1hot_vector(target_list[13], downsample_factor=2, img_height=260, img_width=344)
+    prediction_y1, prediction_x1, prediction_y2, prediction_x2, output_one_hot_y1, output_one_hot_x1, output_one_hot_y2, output_one_hot_x2 = get_prediction_from_1hot_vector(output_dequand_list[13], downsample_factor=2, img_height=260, img_width=344)
         
     # np.where(output_one_hot_x1 == output_one_hot_x1.max())[0][0]
     # prediction_x1
@@ -283,7 +284,3 @@ if __name__ == '__main__':
 
     ani = animation.FuncAnimation(fig=fig, func=update, frames=len(output_dequand_list), interval=200)
     ani.save(filename='model_outputs_' + system + '.mp4', writer='ffmpeg')
-        
-    # encoder_output = encoder_output_list[45]
-    # plt.imshow(encoder_output, cmap='gray')
-    # plt.colorbar()
