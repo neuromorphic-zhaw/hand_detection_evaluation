@@ -39,8 +39,19 @@ class DHP19pklDataset():
 
 
 def get_prediction_from_1hot_vector(vector_1hot, downsample_factor=2, img_height=260, img_width=344):
+    """
+    Extracts the predicted coordinates and maximum values from a one-hot vector.
 
-    # plot model output  as annimation
+    Args:
+        vector_1hot (numpy.ndarray): The one-hot vector containing the predicted coordinates.
+        downsample_factor (int, optional): The factor by which the image is downsampled. Defaults to 2.
+        img_height (int, optional): The height of the image. Defaults to 260.
+        img_width (int, optional): The width of the image. Defaults to 344.
+
+    Returns:
+        tuple: A tuple containing the maximum y-coordinate, maximum x-coordinate, and the one-hot vectors for each coordinate.
+    """
+   
     xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
     
     # get parts of the output data by coordinate and joint
@@ -284,3 +295,4 @@ if __name__ == '__main__':
 
     ani = animation.FuncAnimation(fig=fig, func=update, frames=len(output_dequand_list), interval=200)
     ani.save(filename='model_outputs_' + system + '.mp4', writer='ffmpeg')
+    
