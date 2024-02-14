@@ -77,7 +77,7 @@ num_joints = len(joint_idxs)
 files = os.listdir(event_data_path)
 files = [f for f in files if f.endswith('pt')]
 
-cam_id = cam_idxs[1]
+cam_id = cam_idxs[0]
 # for cam_id in cam_idxs:
 
 input_frames = []

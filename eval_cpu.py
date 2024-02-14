@@ -15,9 +15,8 @@ import pickle
 
 
 class DHP19pklDataset():
-    def __init__(self, path, cam_id=1):
+    def __init__(self, path):
         self.path = path
-        self.cam_id = cam_id
         # load data from pickle file
         with open(path, 'rb') as f:
             data_dict = pickle.load(f)
@@ -89,9 +88,9 @@ if __name__ == '__main__':
     # Set paths to model and data
     project_path = './'
     model_path = project_path + './model/train/'
-    cam_id = 2
+    cam_id = 1
     
-    system = 'cpu_cam' + str(cam_id)
+    system = 'cpu_model_v4_cam' + str(cam_id)
     event_data_path = project_path + 'data/dhp19_samples/' + 'dhp19_data_subject1_cam' + str(cam_id) + '.pkl'
     # paramters of the traininf data
     img_width = 344
@@ -102,7 +101,7 @@ if __name__ == '__main__':
     # Create Dataset instance
     batch_size = 8  # batch size
     learning_rate = 0.00005 # leaerning rate
-    lam = 0.001 # lagrangian for event rate loss
+    lam = 0.01 # lagrangian for event rate loss
     num_epochs = 30  # training epochs
     # steps  = [60, 120, 160] # learning rate reduction milestones
     cam_idxs = [1,2] # camera index to train on 1,2 are frontal views
@@ -111,7 +110,7 @@ if __name__ == '__main__':
     num_joints = len(joint_idxs)
 
     # Load model
-    model_name = 'sdnn_1hot_smoothed_scaled_lowres_rmsprop_relu_v2'
+    model_name = 'sdnn_1hot_smoothed_scaled_lowres_rmsprop_relu_v4'
     # create experiment name
     experiment_name = model_name + \
                     '_epochs' + str(num_epochs) + \
@@ -143,7 +142,7 @@ if __name__ == '__main__':
     # # # # print('Session: ' + str(session) + ', Subject: ' + str(subject) + ', Movement: ' + str(mov) + ', ' + movement_names_df.loc[(movement_names_df['session'] == session) & (movement_names_df['mov'] == mov), 'mov_string'].iloc[0])   
 
     # setup run conditions
-    num_steps = 100 #len(complete_dataset)
+    num_steps = len(complete_dataset)
     buffer_size = num_steps+1
 
     # setup lava process modules
@@ -190,7 +189,6 @@ if __name__ == '__main__':
     # encoder_output_list = []
     target_list = []   
 
-    len(complete_dataset)-num_steps
     # for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
     for t in range(num_steps):
         print('t = ' + str(t))
