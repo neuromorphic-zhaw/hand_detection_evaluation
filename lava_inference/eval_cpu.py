@@ -76,7 +76,7 @@ def get_prediction_from_1hot_vector(vector_1hot, downsample_factor=2, img_height
 
 
 if __name__ == '__main__':      
-    # Check if Loihi2 compiker is available and import related modules.
+    # Check if Loihi2 compiler is available and import related modules.
     # Loihi2.preferred_partition = 'oheogulch'
     # loihi2_is_available = Loihi2.is_loihi2_available
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     # Set paths to model and data
     project_path = './'
-    model_path = project_path + './model/train/'
+    model_path = project_path + '../model/train/'
     cam_id = 1
     
     system = 'cpu_model_v4_cam' + str(cam_id)
@@ -125,6 +125,7 @@ if __name__ == '__main__':
     print('Loading net ' + experiment_name    )
     net = netx.hdf5.Network(net_config=act_model_path + 'model.net', skip_layers=1)
 
+    net.input_shape
     # Load dataset    
     complete_dataset = DHP19pklDataset(path=event_data_path)
     print('Dataset loaded: ' + str(len(complete_dataset)) + ' samples found')
