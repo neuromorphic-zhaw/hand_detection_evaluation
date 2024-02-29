@@ -90,8 +90,8 @@ if __name__ == '__main__':
     model_path = project_path + '../model/train/'
     cam_id = 1
     
-    system = 'cpu_model_v4_cam' + str(cam_id)
-    event_data_path = project_path + 'data/dhp19_samples/' + 'dhp19_data_subject1_cam' + str(cam_id) + '.pkl'
+    system = 'cpu_seq64_last100_cam' + str(cam_id)
+    event_data_path = project_path + '../data/dhp19_samples/' + 'dhp19_data_subject1_cam' + str(cam_id) + '.pkl'
     # paramters of the traininf data
     img_width = 344
     img_height = 260
@@ -99,10 +99,10 @@ if __name__ == '__main__':
     xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
 
     # Create Dataset instance
-    batch_size = 1  # batch size
+    batch_size = 2  # batch size
     learning_rate = 0.000005 # leaerning rate
     lam = 0.01 # lagrangian for event rate loss
-    num_epochs = 30  # training epochs
+    num_epochs = 60  # training epochs
     # steps  = [60, 120, 160] # learning rate reduction milestones
     cam_idxs = [1,2] # camera index to train on 1,2 are frontal views
     seq_length = 8 # number of event frames per sequence to be shown to the SDNN
@@ -110,8 +110,12 @@ if __name__ == '__main__':
     num_joints = len(joint_idxs)
     seq_length = 64
 
+    system = 'cpu' + \
+        '_seq' + str(seq_length) + \
+        '_cam' + str(cam_id)
+
     # Load model
-    model_name = 'sdnn'
+    model_name = 'sdnn_1hot_smoothed_scaled_lowres_relu'
     # create experiment name
     experiment_name = model_name + \
                     '_epochs' + str(num_epochs) + \
@@ -127,7 +131,6 @@ if __name__ == '__main__':
     print('Loading net ' + experiment_name    )
     net = netx.hdf5.Network(net_config=act_model_path + 'model.net', skip_layers=1)
 
-    net.input_shape
     # Load dataset    
     complete_dataset = DHP19pklDataset(path=event_data_path)
     print('Dataset loaded: ' + str(len(complete_dataset)) + ' samples found')
@@ -145,7 +148,8 @@ if __name__ == '__main__':
     # # # # print('Session: ' + str(session) + ', Subject: ' + str(subject) + ', Movement: ' + str(mov) + ', ' + movement_names_df.loc[(movement_names_df['session'] == session) & (movement_names_df['mov'] == mov), 'mov_string'].iloc[0])   
 
     # setup run conditions
-    num_steps = len(complete_dataset)
+    # num_steps = len(complete_dataset)
+    num_steps = 100
     buffer_size = num_steps+1
 
     # setup lava process modules
@@ -192,8 +196,8 @@ if __name__ == '__main__':
     # encoder_output_list = []
     target_list = []   
 
-    # for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
-    for t in range(num_steps):
+    for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
+    # for t in range(num_steps):
         print('t = ' + str(t))
 
         input, target, session, subject, mov  = complete_dataset[t]
