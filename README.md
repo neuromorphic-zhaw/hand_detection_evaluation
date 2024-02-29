@@ -32,13 +32,25 @@ Input sample:
 `model/train/$model_dir_XYZ/` holds the current DHP19 hand detection SDNN model(s)
 
 ### Running model inference in simulation
-`eval_cpu` runs the model on the 4080 input frames for cam 1 or 2 and creates an annimation of the model outputs as .mp4 video, such that on can easily see how the model responded to which input frame. Further, the eucledean distance between prediction and target for both hands are recorded per frame/input and stord as .csv file.
+`eval_cpu_var_seqlength` runs the model on the 4080 input frames for cam 1 or 2 and creates an annimation of the model outputs as .mp4 video, such that on can easily see how the model responded to which input frame. Further, the eucledean distance between prediction and target for both hands are recorded per frame/input and stord as .csv file.
 
 Output sample:  
-![Output sample from the dataset](./doc/img/output_sample.png)  
+![Output sample from the dataset](./doc/img/output_frame10_seq64.png)  
 The x/y coordinates for each hand are predicted by the max() of the corresponding part of the output vector. In the example above, the red line indicates the max of the output (i.e. the predicted coordinate) and the green line is the respective target.
 
-# The Issue
+
+# Issue 1 - static model output when running infernce for longer
+When running the model longer, the model outputs get more and more static. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 10.  
+![Output for frame 10](./doc/img/output_frame10_seq64.png)  
+
+When showing more frames, the output values stay in the expected range [0, 1] but *the peaks that predict the coordinate get more an more shallow*. Further, and more important, the *model outputs become more and more **static***, i.e. do not change anymore with new incoming frames.
+
+This behavioure cannot be shown in single images, but the process can be seen in the corresponding annimation of the output frames. Have a look on the .mp4 file here <https://drive.switch.ch/index.php/s/p8rkpUmgx2JnENR> for the run over all 4080 frames.
+
+When showing the last 100 frames from the dataset first, the model outputs look OK, so the reason is actually the runtime of the model and not the input data. See the output for frames 3980 - 4080 here, when they are presented first <https://drive.switch.ch/index.php/s/mtstThX2JlcFRqE>.
+
+
+# Issue 2. (solved)
 When running the model longer, the model outputs shift to unreasonable values. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 25.  
 ![Output for frame 25](./doc/img/output_frame25.png)  
 When showing more frames, the output values shift towards negativ values (even the model uses a ReLU at the output) and hence, the prediction becomes rather random. See for instance the output for frame 933.  
@@ -47,3 +59,5 @@ This shift in the model output continous further to even more random values at t
 ![Output for frame 3628](./doc/img/output_frame3628.png)
 
 This deterioration process can best be seen in the corresponding annimation of the output frames. Have a look on the .mp4 file here <https://drive.switch.ch/index.php/s/9AM877VHCdOtjqO>
+
+*The Issue could be solved by providing longer sequences of event frames during training in slayer. Training a model with 64 frames yields to Issue 1 described above.*
