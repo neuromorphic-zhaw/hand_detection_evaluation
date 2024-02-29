@@ -38,9 +38,8 @@ Output sample:
 ![Output sample from the dataset](./doc/img/output_frame10_seq64.png)  
 The x/y coordinates for each hand are predicted by the max() of the corresponding part of the output vector. In the example above, the red line indicates the max of the output (i.e. the predicted coordinate) and the green line is the respective target.
 
-
 # Issue 1 - static model output when running infernce for longer
-When running the model longer, the model outputs get more and more static. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 10.  
+When running the model longer, the model outputs get more and more static. That means, in the beginning (first 100 - 600 frames) the model produces outputs that are expected such as in the example below for frame 10.  
 ![Output for frame 10](./doc/img/output_frame10_seq64.png)  
 
 When showing more frames, the output values stay in the expected range [0, 1] but *the peaks that predict the coordinate get more an more shallow*. Further, and more important, the *model outputs become more and more **static***, i.e. do not change anymore with new incoming frames.
@@ -50,7 +49,7 @@ This behavioure cannot be shown in single images, but the process can be seen in
 When showing the last 100 frames from the dataset first, the model outputs look OK, so the reason is actually the runtime of the model and not the input data. See the output for frames 3980 - 4080 here, when they are presented first <https://drive.switch.ch/index.php/s/mtstThX2JlcFRqE>.
 
 
-# Issue 2. (solved)
+# Issue 2 (solved)
 When running the model longer, the model outputs shift to unreasonable values. That means, in the beginning (first 100 frames) the model produces outputs that are expected such as in the example below for frame 25.  
 ![Output for frame 25](./doc/img/output_frame25.png)  
 When showing more frames, the output values shift towards negativ values (even the model uses a ReLU at the output) and hence, the prediction becomes rather random. See for instance the output for frame 933.  
