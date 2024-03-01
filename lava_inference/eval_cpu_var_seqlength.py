@@ -98,7 +98,7 @@ if __name__ == '__main__':
     downsample_factor = 2
     xy_coord_vec_length = int((img_width + img_height)/downsample_factor)
 
-    # Create Dataset instance
+    # Define model to be loaded
     batch_size = 2  # batch size
     learning_rate = 0.000005 # leaerning rate
     lam = 0.01 # lagrangian for event rate loss
@@ -148,8 +148,8 @@ if __name__ == '__main__':
     # # # # print('Session: ' + str(session) + ', Subject: ' + str(subject) + ', Movement: ' + str(mov) + ', ' + movement_names_df.loc[(movement_names_df['session'] == session) & (movement_names_df['mov'] == mov), 'mov_string'].iloc[0])   
 
     # setup run conditions
-    # num_steps = len(complete_dataset)
-    num_steps = 100
+    num_steps = len(complete_dataset)
+    # num_steps = 100
     buffer_size = num_steps+1
 
     # setup lava process modules
