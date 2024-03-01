@@ -90,7 +90,6 @@ if __name__ == '__main__':
     model_path = project_path + '../model/train/'
     cam_id = 1
     
-    system = 'cpu_seq64_last100_cam' + str(cam_id)
     event_data_path = project_path + '../data/dhp19_samples/' + 'dhp19_data_subject1_cam' + str(cam_id) + '.pkl'
     # paramters of the traininf data
     img_width = 344
@@ -196,8 +195,8 @@ if __name__ == '__main__':
     # encoder_output_list = []
     target_list = []   
 
-    for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
-    # for t in range(num_steps):
+    # for t in range(len(complete_dataset)-num_steps, len(complete_dataset)):
+    for t in range(num_steps):
         print('t = ' + str(t))
 
         input, target, session, subject, mov  = complete_dataset[t]
