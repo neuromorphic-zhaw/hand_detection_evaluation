@@ -109,9 +109,12 @@ if __name__ == '__main__':
     num_joints = len(joint_idxs)
     seq_length = 64
 
+    reset_interval = 100
+    
     system = 'cpu' + \
         '_seq' + str(seq_length) + \
-        '_cam' + str(cam_id)
+        '_cam' + str(cam_id) + \
+        '_reset' + str(reset_interval)
 
     # Load model
     model_name = 'sdnn_1hot_smoothed_scaled_lowres_relu'
@@ -129,6 +132,8 @@ if __name__ == '__main__':
     
     print('Loading net ' + experiment_name    )
     net = netx.hdf5.Network(net_config=act_model_path + 'model.net', skip_layers=1)
+    net.reset_interval = reset_interval
+
 
     # Load dataset    
     complete_dataset = DHP19pklDataset(path=event_data_path)
@@ -168,6 +173,8 @@ if __name__ == '__main__':
     sender.out_port.connect(encoder.a_in)
     encoder.s_out.connect(net.inp)
     net.out.connect(receiver.in_port)
+
+ 
 
     # setup display of the encoded input
     encoder_output_extractor = io.extractor.Extractor(shape=net.inp.shape, buffer_size=buffer_size)
