@@ -107,14 +107,14 @@ if __name__ == '__main__':
     seq_length = 8 # number of event frames per sequence to be shown to the SDNN
     joint_idxs = [7, 8] # joint indices to train on
     num_joints = len(joint_idxs)
-    seq_length = 64
+    seq_length = 128
 
-    reset_interval = 100
+    # reset_interval = 100
     
     system = 'cpu' + \
         '_seq' + str(seq_length) + \
-        '_cam' + str(cam_id) + \
-        '_reset' + str(reset_interval)
+        '_cam' + str(cam_id)
+        # '_reset' + str(reset_interval)
 
     # Load model
     model_name = 'sdnn_1hot_smoothed_scaled_lowres_relu'
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     
     print('Loading net ' + experiment_name    )
     net = netx.hdf5.Network(net_config=act_model_path + 'model.net', skip_layers=1)
-    net.reset_interval = reset_interval
+    # net.reset_interval = reset_interval
 
 
     # Load dataset    
