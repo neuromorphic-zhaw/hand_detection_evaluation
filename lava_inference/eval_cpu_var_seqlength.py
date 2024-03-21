@@ -109,12 +109,12 @@ if __name__ == '__main__':
     num_joints = len(joint_idxs)
     seq_length = 64
 
-    system = 'cpu_cumerror' + \
+    system = 'cpu' + \
         '_seq' + str(seq_length) + \
         '_cam' + str(cam_id)
     
     # Load model
-    model_name = 'sdnn_1hot_smoothed_scaled_lowres_relu_cumerror'
+    model_name = 'sdnn_1hot_smoothed_scaled_lowres_relu'
     # create experiment name
     experiment_name = model_name + \
                     '_epochs' + str(num_epochs) + \
@@ -123,6 +123,7 @@ if __name__ == '__main__':
                     '_seq' + str(seq_length) + \
                     '_cam' + str(cam_idxs).replace(' ', '') + \
                     '_lam' + str(lam)
+    
     act_model_path = model_path + experiment_name + '/'
     
     print('Loading net ' + experiment_name    )

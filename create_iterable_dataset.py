@@ -62,7 +62,8 @@ def target_coords_to_onehot_smoothed_lowres(target_coords_by_cam, img_height=260
 project_path = './'
 model_path = project_path + './model/train/'
 event_data_path = project_path + './data/dhp19_samples/'
-# paramters of the traininf data
+
+# paramters of the training data
 img_width = 344
 img_height = 260
 downsample_factor = 2
