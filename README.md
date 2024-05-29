@@ -6,12 +6,13 @@ Evaluate DHP19 hand detection model running for a subject of the DHP19 dataset.
 pip list | grep lava
 pip list | grep nx
 ``` 
-- lava-dl                   0.4.0
-- lava-dnf                  0.1.4
-- lava-loihi                0.5.0
-- lava-nc                   0.8.0
-- lava-optimization         0.3.0
-- nxcore                    2.4.0
+- lava-dl                   0.5.0
+- lava-dnf                  0.2.0
+- lava-loihi                0.6.0
+- lava-nc                   0.9.0
+- lava-optimization         0.4.0
+- lava-peripherals          0.1.0
+- nxcore                    2.5.0
 
 ### DHP19 Data Subject 1
 Download the .pkl files from <https://drive.switch.ch/index.php/s/Afbx4d00HM0ZRWy> and put into a folder `data/dhp19_samples`.
